@@ -63,7 +63,7 @@ if __name__ == "__main__":
         score_response = f"<think>{thinking_content}</think> \n\n {response_content}"
         score_match = re.search(r"<score>(.*?)</score>", response_content)
         if score_match:
-            score = score_match.grup(1)
+            score = score_match.group(1)
         else:
             score = 0
 

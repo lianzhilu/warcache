@@ -38,6 +38,7 @@ The user will provide a complete, runnable program. Your task is to refactor it 
 - Do not use any transformations or operations that are not specified in the given rules.
 
 Apply the refactoring conservatively and ensure the result remains functionally equivalent while being more compatible with the target runtime.
+In the end, you only need to output the complete refactoring code without outputting other content
 """
 
 # model
