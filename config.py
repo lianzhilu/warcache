@@ -77,6 +77,19 @@ PROGRAM_PATH = "./program"
 SCORE_RESULT_PATH = "./score"
 REFACTOR_RESULT_PATH = "./refactor"
 
+# runtime command
+RUNTIME_COMMANDS = {
+    "wasmer": ["wasmer", "run"],
+    "wasmtime": ["wasmtime"],
+    "wasm3": ["wasm3"],
+    "wamr": ["./iwasm"],
+    "wasmedge": ["wasmedge"]
+}
+
+# export WASI_PATH. e.g. /xxx/xxx/wasi-sdk-xxx/bin
+WASI_PATH = os.environ.get("WASI_PATH")
+
+
 def get_cache_rule(feature: str) -> str:
     rules = CACHE_RULE.get(feature.upper())
     if not rules:
