@@ -27,6 +27,9 @@ export WASI_PATH=/path/to/wasi-sdk/bin
 ```
 
 ## Usage
+### Confirm Cache Feature
+Run the program in the `crs_benchmark/` directory under the target WASM runtime. The shortest time-consuming strategy can be confirmed as the best feature of the runtime.
+
 ### Cache Friendliness Scoring
 To score programs based on a specific cache feature, run the following command:
 ```bash
