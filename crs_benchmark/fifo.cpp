@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <cstdlib>
 #include <ctime>
-#define CACHE_SIZE 16 // 缓存大小
+#define CACHE_SIZE 16
 #define MY_PAGE_SIZE 4096
 #define PAGE_NUM 100
 
@@ -12,8 +12,8 @@ using namespace std;
 class FIFOCache {
 private:
     int capacity;
-    list<int> fifo_queue;  // 维护插入顺序的队列
-    unordered_map<int, list<int>::iterator> cache_map;  // 键到队列位置的映射
+    list<int> fifo_queue;
+    unordered_map<int, list<int>::iterator> cache_map;
 
 public:
     FIFOCache(int cap) : capacity(cap) {}
@@ -24,16 +24,14 @@ public:
 
     void put(int key) {
         if (capacity <= 0) return;
-        if (get(key)) return;  // 已存在不处理
+        if (get(key)) return;
         
         if (fifo_queue.size() >= capacity) {
-            // 淘汰最早进入的键
             int oldest_key = fifo_queue.front();
             fifo_queue.pop_front();
             cache_map.erase(oldest_key);
         }
-        
-        // 插入新键到队列尾部
+
         fifo_queue.push_back(key);
         cache_map[key] = prev(fifo_queue.end());
     }
@@ -57,10 +55,8 @@ int main(int argc, char **argv) {
     srand(time(0));
     FIFOCache cache(CACHE_SIZE);
 
-    // 初始化页池
     initPages();
 
-    // 模拟1000次访问
     for (int i = 0; i < iterNum; ++i) {
         int page_num = rand() % N;
         if (!cache.get(page_num)) {

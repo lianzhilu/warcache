@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-#define CACHE_SIZE 16 // 缓存大小
+#define CACHE_SIZE 16
 #define MY_PAGE_SIZE 4096
 #define PAGE_NUM 100
 

@@ -3,7 +3,7 @@
 #include <list>
 #include <cstdlib>
 #include <ctime>
-#define CACHE_SIZE 16 // 缓存大小
+#define CACHE_SIZE 16
 #define MY_PAGE_SIZE 4096
 #define PAGE_NUM 100
 
@@ -19,8 +19,8 @@ private:
     };
     
     int capacity;
-    Node* head;  // 虚拟头节点
-    Node* tail;  // 虚拟尾节点
+    Node* head;
+    Node* tail;
     unordered_map<int, Node*> cache_map;
     
     void addToHead(Node* node) {
@@ -66,7 +66,7 @@ public:
 
     void put(int key) {
         if (capacity == 0) return;
-        if (get(key)) {  // 已存在则更新位置
+        if (get(key)) {
             return;
         }
         if (cache_map.size() >= capacity) {
@@ -98,10 +98,8 @@ int main(int argc, char **argv) {
     srand(time(0));
     LRUCache cache(CACHE_SIZE);
 
-    // 初始化页池
     initPages();
 
-    // 模拟访问
     for (int i = 0; i < iterNum; ++i) {
         int page_num = rand() % N;
         if (!cache.get(page_num)) {
