@@ -1,9 +1,10 @@
 import argparse
 
 from openai import OpenAI
+from pandas.io.sql import execute
 
 from config import API_KEY, PROGRAM_PATH, REFACTOR_RESULT_PATH, SCORE_MODEL, get_refactor_system_prompt
-from util import get_files_tuple_with_suffix
+from util import get_files_tuple_with_suffix, format_compile_result, format_execute_result_comparison
 
 client = OpenAI(api_key=API_KEY, base_url="https://api.deepseek.com")
 
@@ -26,18 +27,20 @@ if __name__ == "__main__":
         with open(file_path, "r") as f:
             program_content = f.read()
 
+        messages = [
+            {
+                "role": "system",
+                "content": get_refactor_system_prompt(feature, runtime),
+            },
+            {
+                "role": "user",
+                "content": program_content,
+            },
+        ]
+
         response = client.chat.completions.create(
             model=SCORE_MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": get_refactor_system_prompt(feature, runtime),
-                },
-                {
-                    "role": "user",
-                    "content": program_content,
-                },
-            ],
+            messages=messages,
             stream=True
         )
 
@@ -62,4 +65,44 @@ if __name__ == "__main__":
 
         with open(f"{output_dir}/{program_name}.refactor_response", "w", newline="") as f:
             f.write(refactor_response)
+
+        # check refactor
+        compile_flag, compile_message = format_compile_result(f"{output_dir}/{file_name}", program_name)
+        while not compile_flag:
+            print("\n\n--------------compile failed. start a new round--------------")
+            messages.append({
+                "role": "assistant",
+                "content": response_content,
+            })
+            messages.append({
+                "role": "user",
+                "content": f"The refactoring program compilation failed. The reason for the failure is: {compile_message}. The complete program used for compilation is: {refactor_program}",
+            })
+
+            response = client.chat.completions.create(
+                model=SCORE_MODEL,
+                messages=messages,
+                stream=True
+            )
+
+            for chunk in response:
+                if not chunk.choices:
+                    continue
+                if chunk.choices[0].delta.reasoning_content:
+                    thinking_content += chunk.choices[0].delta.reasoning_content
+                    print(chunk.choices[0].delta.reasoning_content, end="")
+                else:
+                    response_content += chunk.choices[0].delta.content
+                    print(chunk.choices[0].delta.content, end="")
+
+            refactor_response = f"<think>{thinking_content}</think> \n\n {response_content}"
+            refactor_program = response_content
+
+            with open(f"{output_dir}/{file_name}", "w", newline="") as f:
+                f.write(refactor_program)
+
+            with open(f"{output_dir}/{program_name}.refactor_response", "w", newline="") as f:
+                f.write(refactor_response)
+
+            compile_flag, compile_message = format_compile_result(f"{output_dir}/{file_name}", program_name)
 
