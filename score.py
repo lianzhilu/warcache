@@ -1,6 +1,6 @@
 import argparse
 import csv
-from typing import re
+import re
 
 from openai import OpenAI
 
