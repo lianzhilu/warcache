@@ -1,4 +1,7 @@
 import argparse
+import csv
+from typing import re
+
 from openai import OpenAI
 
 from config import API_KEY, PROGRAM_PATH, SCORE_RESULT_PATH, SCORE_MODEL, get_score_system_prompt
@@ -12,12 +15,18 @@ parser.add_argument("--input","-i", type=str, default=PROGRAM_PATH, help="progra
 parser.add_argument("--output","-o", type=str, default=SCORE_RESULT_PATH, help="cache scoring output dir")
 
 
+
 if __name__ == "__main__":
     args = parser.parse_args()
     feature = args.feature
     input_dir = args.input
     output_dir = args.output
+
     file_tuples = get_files_tuple_with_suffix(input_dir, "c")
+
+    with open(f"{output_dir}/score_results.csv", mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["program", "score"])
 
     for file_path, file_name, program_name in file_tuples:
         with open(file_path, "r") as f:
@@ -52,6 +61,16 @@ if __name__ == "__main__":
                 print(chunk.choices[0].delta.content, end="")
 
         score_response = f"<think>{thinking_content}</think> \n\n {response_content}"
+        score_match = re.search(r"<score>(.*?)</score>", response_content)
+        if score_match:
+            score = score_match.grup(1)
+        else:
+            score = 0
+
+        with open(f"{output_dir}/score_results.csv", mode="w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow([file_name, score])
+
         with open(f"{output_dir}/{program_name}.score_response", "w", newline="") as f:
             f.write(score_response)
 
